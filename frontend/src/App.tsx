@@ -27,6 +27,10 @@ function App() {
     ws.onmessage = (mEvent) => {
       alert(mEvent.data);
     };
+
+    return () => {
+      ws.close(); // 👈 ensures the duplicate is cleaned up
+    };
   }, []);
 
   return (
