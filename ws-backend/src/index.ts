@@ -4,7 +4,7 @@ const wss = new WebSocketServer({ port: 8000 });
 
 interface User {
   socket: WebSocket;
-  room: string | null;
+  room: string;
 }
 
 let allUsers: User[] = [];
@@ -14,7 +14,7 @@ wss.on("connection", function connection(socket) {
   if (!allUsers.some((user) => user.socket === socket)) {
     allUsers.push({
       socket,
-      room: null,
+      room: "defaultRoom",
     });
   }
 

@@ -1,17 +1,24 @@
-import { useEffect, useRef, useState } from "react";
-import "./App.css";
+import { useEffect, useState } from "react";
 
 function App() {
   const [socket, setSocket] = useState<WebSocket>();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [messages, setMessages] = useState<string[]>(["Hi there"]);
+  const [message, setMessage] = useState<string>("");
 
   function sendMessage() {
     if (!socket) return;
-    const message = inputRef.current?.value;
-    socket.send(message ?? "");
-  }
-  function ping() {
-    socket?.send("ping");
+    if (message === "") return;
+
+    setMessages((m) => [...m, message]);
+
+    socket.send(
+      JSON.stringify({
+        type: "chat",
+        payload: {
+          message,
+        },
+      })
+    );
   }
 
   useEffect(function () {
@@ -25,7 +32,7 @@ function App() {
     // ws.onopen = () => {};
 
     ws.onmessage = (mEvent) => {
-      alert(mEvent.data);
+      setMessages((m) => [...m, mEvent.data]);
     };
 
     return () => {
@@ -34,10 +41,28 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <input ref={inputRef} type="text" placeholder="Message..." />
-      <button onClick={sendMessage}>Send</button>
-      <button onClick={ping}>ping</button>
+    <div className="h-screen bg-black flex flex-col">
+      <div className="h-[90vh] bg-white m-10 rounded-md p-5 overflow-y-scroll">
+        <ul>
+          {messages.map((m) => (
+            <li key={m}>{m}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex gap-5 w-full px-10 py-5">
+        <input
+          className="rounded-lg w-[80%]"
+          type="text"
+          placeholder="Message..."
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <button
+          className="bg-purple-600 text-white rounded-lg w-[20%]"
+          onClick={sendMessage}
+        >
+          Send Message
+        </button>
+      </div>
     </div>
   );
 }
